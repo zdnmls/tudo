@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TODOLIST</title>
+    <script src="jquery.js"></script>
+</head>
+<style>
+    *{
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        font-size: 16px;
+        background: #CDCDCD;
+    }
+    .head{
+        width: 100%;
+        height: 50px;
+        background: #323232;
+    }
+    .header{
+        width: 600px;
+        height: 50px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+    }
+    .to{
+        width: 150px;
+        height: 50px;
+        line-height: 50px;
+        font-size: 30px;
+        color: #DDD;
+    }
+    .header input{
+        width:400px;
+        height: 40px;
+        margin: 5px auto;
+        border-radius: 5px;
+        outline-style: none;
+        border: none;
+        text-indent: 10px;
+    }
+    section{
+        width: 580px;
+        height:auto;
+        margin: 0 auto;
+        padding:0 10px;
+        margin-top: 20px;
+    }
+    h2{
+        width:100%;
+        height:auto;
+        display: flex;
+        margin: 0 auto;
+        justify-content: space-between;
+    }
+    .doing span{
+        width:20px;
+        height:20px;
+        border-radius:100%;
+        display: inline-block;
+        background: #E6E6FA;
+        line-height: 20px;
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+    }
+    .done span{
+        width:20px;
+        height:20px;
+        border-radius:100%;
+        display: inline-block;
+        background: #E6E6FA;
+        line-height: 20px;
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+    }
+    footer{
+        width: 100%;
+        height: 20px;
+        margin-top: 20px;
+        color: #666;
+        font-size: 14px;
+        text-align: center;
+    }
+    footer a{
+        color: #999;
+
+    }
+    ul{
+        width: 100%;
+        height: auto;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    li{
+        width: 100%;
+        height: 32px;
+        border-radius: 6px;
+        border-left: 5px solid #999;
+        opacity: 1;
+        background: #fff;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+    .con{
+        width: 75%;
+        height: 100%;
+        font-size: 14px;
+        line-height: 30px;
+        color: #333;
+        text-align: center;
+    }
+</style>
+<body>
+<div class="head">
+    <div class="header">
+        <div class="to">ToDoList</div>
+        <input type="text" id="input" name="title" placeholder="添加todo">
+    </div>
+</div>
+<div class="box">
+    <section class="doing">
+        <h2>正在进行
+            <span class="yi">0</span>
+        </h2>
+        <ul>
+
+        </ul>
+    </section>
+    <section class="done">
+        <h2>已经完成
+        <span class="er">0</span>
+        </h2>
+        <ul>
+        </ul>
+    </section>
+</div>
+<footer>Copyright © 2014 todolist.cn
+    <a href="">clear</a>
+</footer>
+</body>
+</html>
+<script>
+    // let datebase=[
+    //     {id:1,content:'35561',status:true},
+    //     {id:2,content:'324',status:false},
+    //     {id:3,content:'78767',status:true},
+    //     {id:4,content:'45345235',status:false},
+    //     {id:5,content:'53241',status:false},
+    //     {id:6,content:'8676',status:true},
+    // ];
+    let nextid=7;
+    let database=[];
+    if(localStorage.data){
+        database=JSON.parse(localStorage.data)
+    }
+    function render() {
+        let doing=[];
+        let done=[];
+    database.forEach(val=>{
+            if(val.status){
+                done.push(val);
+            }
+            else{
+                doing.push(val);
+            }
+        })
+        let str="";
+        doing.forEach(val=>{
+            str+=`
+            <li id="${val.id}">
+            <input type="checkbox">
+            <p class="con">${val.content}</p>
+            <div class="del">@</div>
+            </li>
+            `;
+        })
+        $('.doing').find('ul').html(str).end().find('.yi').html(doing.length);
+
+
+        let atr="";
+        done.forEach(val=>{
+            atr+=`
+                <li id="${val.id}">
+                <input type="checkbox" checked>
+                <p class="con">${val.content}</p>
+                <div class="del">@</div>
+                </li>`;
+        })
+        $('.done').find('ul').html(atr).end().find('.er').html(done.length);
+    }
+    render();
+    localStorage.data=JSON.stringify(database);
+    localStorage.nextid=nextid;
+
+//  转换
+    $('.box').on('click','.del',function (e) {
+        e.preventDefault();
+        let id=$(this).closest('li').attr('id');
+        let index=database.findIndex(val=>val.id==id);
+        // console.log(id,index);
+        database.splice(index,1);
+        localStorage.data=JSON.stringify(database);
+        localStorage.nextid=nextid;
+        render();
+    }).on('click','p',function () {
+        let id=$(this).closest('li').attr('id');
+        let index=database.findIndex(val=>val.id==id);
+        let input=$('<input>').val($(this).text());
+        $(this).html('').append(input);
+        input.focus();
+        input.change(function () {
+            database[index].content=$(this).val();
+            localStorage.data=JSON.stringify(database);
+            localStorage.nextid=nextid;
+            render();
+        })
+    }).on('click','input:checkbox',function () {
+            let id=$(this).closest('li').attr('id');
+            let index=database.findIndex(val=>val.id==id);
+        database[index].status=!database[index].status;
+        localStorage.data=JSON.stringify(database);
+        localStorage.nextid=nextid;
+            render();
+        });
+
+        //input添加新内容
+        let input1=$('.header').find('#input');
+        console.log(input1);
+            input1.on('keyup',function (e) {
+                if(e.which===13){
+                    if($(this).val()){
+                        database.unshift({id:nextid,content:$(this).val(),status:false});
+                        nextid++;
+                        localStorage.data=JSON.stringify(database);
+                        localStorage.nextid=nextid;
+                        render();
+                    }
+                }
+            })
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
